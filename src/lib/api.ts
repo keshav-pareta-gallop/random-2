@@ -31,23 +31,9 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
   return response.json() as Promise<T>;
 }
 
-export interface CreateTaskPayload {
-  title: string;
-  description?: string;
-  dueDate?: string;
-}
+import type { Task, CreateTaskPayload } from '../types/task';
 
-export interface Task {
-  id: string;
-  title: string;
-  description: string | null;
-  dueDate: string | null;
-  status: 'todo' | 'in_progress' | 'done';
-  assigneeId: string | null;
-  createdBy: string;
-  createdAt: string;
-  updatedAt: string;
-}
+export type { Task, CreateTaskPayload };
 
 export function createTask(data: CreateTaskPayload): Promise<Task> {
   return apiFetch<Task>('/api/tasks', {
