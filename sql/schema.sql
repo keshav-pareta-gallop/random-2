@@ -1,22 +1,23 @@
--- Source: MySQL 8 — customer orders schema
-CREATE TABLE customers (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  email VARCHAR(255) NOT NULL UNIQUE,
-  full_name VARCHAR(120) NOT NULL,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
+-- Source: SQL Server — customer orders schema
+CREATE TABLE dbo.Customers (
+  CustomerId INT IDENTITY(1,1) PRIMARY KEY,
+  Email NVARCHAR(255) NOT NULL UNIQUE,
+  FullName NVARCHAR(120) NOT NULL,
+  CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+);
 
-CREATE TABLE orders (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  customer_id INT NOT NULL,
-  total DECIMAL(10,2) NOT NULL,
-  status ENUM('placed','shipped','delivered') NOT NULL DEFAULT 'placed',
-  placed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (customer_id) REFERENCES customers(id)
-) ENGINE=InnoDB;
+CREATE TABLE dbo.Orders (
+  OrderId INT IDENTITY(1,1) PRIMARY KEY,
+  CustomerId INT NOT NULL REFERENCES dbo.Customers(CustomerId),
+  Total DECIMAL(10,2) NOT NULL,
+  Status NVARCHAR(20) NOT NULL DEFAULT N'placed' CHECK (Status IN (N'placed', N'shipped', N'delivered')),
+  PlacedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+);
+GO
 
 -- Report: lifetime value per customer
-CREATE VIEW customer_lifetime_value AS
-SELECT c.id, c.email, IFNULL(SUM(o.total), 0) AS lifetime_value, COUNT(o.id) AS order_count
-FROM customers c LEFT JOIN orders o ON o.customer_id = c.id
-GROUP BY c.id, c.email;
+CREATE VIEW dbo.CustomerLifetimeValue AS
+SELECT c.CustomerId, c.Email, ISNULL(SUM(o.Total), 0) AS LifetimeValue, COUNT(o.OrderId) AS OrderCount
+FROM dbo.Customers c LEFT JOIN dbo.Orders o ON o.CustomerId = c.CustomerId
+GROUP BY c.CustomerId, c.Email;
+GO
